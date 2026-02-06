@@ -18,7 +18,7 @@ struct PasswordEntryView: View {
                     .font(.system(size: 48, weight: .thin))
                     .foregroundStyle(AppColor.accent)
 
-                Text("Period Tracker")
+                Text("MoonThread")
                     .font(AppFont.title)
                     .foregroundStyle(AppColor.textPrimary)
 

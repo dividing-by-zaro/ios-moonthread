@@ -23,11 +23,7 @@ enum APIError: Error, LocalizedError {
 actor APIClient {
     static let shared = APIClient()
 
-    #if DEBUG
-    private var baseURL = "http://localhost:8000"
-    #else
-    private var baseURL = "https://YOUR-RAILWAY-URL.railway.app"
-    #endif
+    private var baseURL = "https://your-backend-url.example.com"
 
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
