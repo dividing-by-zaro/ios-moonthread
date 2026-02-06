@@ -4,7 +4,7 @@ A period tracking iOS app with cloud backup.
 
 ### Features
 - [x] Start/end period tracking with single tap
-- [x] Calendar view with period days highlighted
+- [x] Infinite-scroll calendar with multiple months and period days highlighted
 - [x] Stats dashboard (average cycle length, average period length, next prediction)
 - [x] Full period history log
 - [x] Cloud backup via FastAPI + PostgreSQL backend on Railway

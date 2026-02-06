@@ -4,22 +4,33 @@ import SwiftUI
 @Observable
 class CalendarViewModel {
     var periods: [Period] = []
-    var displayedMonth: Date = Date()
+    var months: [Date] = []
     var isLoading = false
     var errorMessage: String?
     var showUnauthorized = false
 
     private let calendar = Calendar.current
+    private let batchSize = 12
 
-    var monthTitle: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: displayedMonth)
+    init() {
+        let now = Date()
+        let currentMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        for i in 0..<batchSize {
+            if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
+                months.append(month)
+            }
+        }
     }
 
-    var daysInMonth: [Date?] {
-        guard let range = calendar.range(of: .day, in: .month, for: displayedMonth),
-              let firstDay = calendar.date(from: calendar.dateComponents([.year, .month], from: displayedMonth))
+    func monthTitle(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: date)
+    }
+
+    func daysInMonth(for monthDate: Date) -> [Date?] {
+        guard let range = calendar.range(of: .day, in: .month, for: monthDate),
+              let firstDay = calendar.date(from: calendar.dateComponents([.year, .month], from: monthDate))
         else { return [] }
 
         let weekday = calendar.component(.weekday, from: firstDay)
@@ -48,15 +59,14 @@ class CalendarViewModel {
         calendar.isDateInToday(date)
     }
 
-    func previousMonth() {
-        if let date = calendar.date(byAdding: .month, value: -1, to: displayedMonth) {
-            displayedMonth = date
-        }
-    }
-
-    func nextMonth() {
-        if let date = calendar.date(byAdding: .month, value: 1, to: displayedMonth) {
-            displayedMonth = date
+    func loadMoreIfNeeded(currentMonth: Date) {
+        guard let last = months.last, currentMonth == last else { return }
+        if let oldest = months.last {
+            for i in 1...batchSize {
+                if let month = calendar.date(byAdding: .month, value: -i, to: oldest) {
+                    months.append(month)
+                }
+            }
         }
     }
 

@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA000001 /* PeriodTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001; };
-		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000002; };
-		AA000003 /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000003; };
-		AA000004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000004; };
-		AA000005 /* Period.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000005; };
-		AA000006 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000006; };
-		AA000007 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000007; };
-		AA000008 /* PasswordEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000008; };
-		AA000009 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000009; };
-		AA000010 /* CalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000010; };
-		AA000011 /* LogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000011; };
-		AA000012 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000012; };
-		AA000013 /* PeriodStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000013; };
-		AA000014 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000014; };
-		AA000015 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000015; };
-		AA000016 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000016; };
-		AA000017 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000017; };
-		AA000018 /* PeriodRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000018; };
-		AA000019 /* StatsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000019; };
-		AA000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB000020; };
+		AA000001 /* PeriodTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001 /* PeriodTrackerApp.swift */; };
+		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000002 /* ContentView.swift */; };
+		AA000003 /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000003 /* ColorTokens.swift */; };
+		AA000004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000004 /* Typography.swift */; };
+		AA000005 /* Period.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000005 /* Period.swift */; };
+		AA000006 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000006 /* APIClient.swift */; };
+		AA000007 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000007 /* KeychainHelper.swift */; };
+		AA000008 /* PasswordEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000008 /* PasswordEntryView.swift */; };
+		AA000009 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000009 /* HomeViewModel.swift */; };
+		AA000010 /* CalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000010 /* CalendarViewModel.swift */; };
+		AA000011 /* LogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000011 /* LogViewModel.swift */; };
+		AA000012 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000012 /* HomeView.swift */; };
+		AA000013 /* PeriodStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000013 /* PeriodStatusCard.swift */; };
+		AA000014 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000014 /* ActionButton.swift */; };
+		AA000015 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000015 /* CalendarView.swift */; };
+		AA000016 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000016 /* DayCell.swift */; };
+		AA000017 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000017 /* LogView.swift */; };
+		AA000018 /* PeriodRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000018 /* PeriodRow.swift */; };
+		AA000019 /* StatsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000019 /* StatsCard.swift */; };
+		AA000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB000020 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -176,7 +176,7 @@
 /* Begin PBXNativeTarget section */
 		AF000001 /* PeriodTracker */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AG000003;
+			buildConfigurationList = AG000003 /* Build configuration list for PBXNativeTarget "PeriodTracker" */;
 			buildPhases = (
 				AF000002 /* Sources */,
 				AD000001 /* Frameworks */,
@@ -206,7 +206,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AG000001;
+			buildConfigurationList = AG000001 /* Build configuration list for PBXProject "PeriodTracker" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -376,6 +376,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeriodTracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -388,7 +389,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.periodtracker.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.izaro.moonthread;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -403,6 +404,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeriodTracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -415,7 +417,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.periodtracker.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.izaro.moonthread;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

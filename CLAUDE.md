@@ -1,33 +1,64 @@
-## MoonThread — Project Context
+# CLAUDE.md
 
-### Architecture
-- **Backend:** FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway
-- **iOS:** SwiftUI (iOS 17+), MVVM with `@Observable` ViewModels, `actor APIClient`
-- **Auth:** Password-based API key. Backend checks `X-API-Key` header; iOS stores password in Keychain
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Build & Run Commands
+
+### Backend
+```bash
+cd backend
+uv sync                                    # Install dependencies
+uv run alembic upgrade head                # Run migrations (requires running PostgreSQL)
+uv run uvicorn app.main:app --reload       # Start dev server on :8000
+uv run import_periods.py periods.csv       # Import CSV data (reads API_KEY from .env)
+```
+
+### iOS
+```bash
+# Build
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
+  -project PeriodTracker/PeriodTracker.xcodeproj \
+  -scheme PeriodTracker \
+  -destination 'platform=iOS Simulator,name=iPhone 16e' build
+
+# Install & launch in simulator
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl install booted \
+  ~/Library/Developer/Xcode/DerivedData/PeriodTracker-*/Build/Products/Debug-iphonesimulator/PeriodTracker.app
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl launch booted com.izaro.moonthread
+```
+
+## Architecture
+
+Two independent codebases in one repo: a Python backend and a SwiftUI iOS app communicating over REST.
 
 ### Backend (`backend/`)
-- Entry point: `app/main.py`
-- Config auto-converts `postgresql://` → `postgresql+asyncpg://` for Railway compatibility
-- Single `periods` table: `id`, `start_date`, `end_date` (nullable for open periods), `created_at`
-- Alembic migrations run on container startup before uvicorn
-- `import_periods.py` — CSV backfill utility with duplicate detection. Never print period data to console.
+FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
+
+- **Entry point:** `app/main.py` — mounts period routes with API key auth dependency; `/health` is unauthenticated
+- **Auth:** `X-API-Key` header checked against `API_KEY` env var on every request (except `/health`)
+- **Data model:** Single `periods` table — `id`, `start_date`, `end_date` (NULL = ongoing), `created_at`
+- **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)
+- **Config:** `app/config.py` auto-converts Railway's `postgresql://` to `postgresql+asyncpg://`
+- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile
+- **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle
 
 ### iOS (`PeriodTracker/`)
-- App displays as "MoonThread" (`CFBundleDisplayName` in Info.plist)
-- Base URL hardcoded to Railway production URL (no debug/release split)
-- Theme: smoky green dark palette — `ColorTokens.swift` and `Typography.swift`
-- Three tabs: Home (status + toggle), Calendar (month grid), Log (stats + history)
-- All views handle 401 by resetting to password entry screen
+SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 
-### Privacy
-- `periods.csv` is gitignored — never read, print, or commit personal health data
-- `.env` is gitignored — contains `API_KEY`
+- **Networking:** `APIClient` is an `actor` singleton. Reads API key from iOS Keychain, sends as `X-API-Key` header. Base URL hardcoded to Railway production (no debug/release split).
+- **Auth flow:** `PasswordEntryView` → saves to Keychain → validates via `/periods/stats` → 401 resets back to password screen. All three tab ViewModels watch for 401 and trigger re-auth.
+- **MVVM:** Each tab has an `@Observable` ViewModel (`HomeViewModel`, `CalendarViewModel`, `LogViewModel`). Views bind to these.
+- **Theme:** Smoky green dark palette in `ColorTokens.swift`, rounded typography in `Typography.swift`. Forced dark mode at app root.
+- **Tabs:** Home (period status + start/end toggle), Calendar (infinite-scroll multi-month grid with period highlighting), Log (avg stats + period history list)
+- **Bundle ID:** `com.izaro.moonthread`
+- **Xcode project:** Hand-written `.pbxproj` — when adding Swift files, they must be registered in both the PBXFileReference and PBXBuildFile sections.
 
-### Build & Run
-```bash
-# Backend locally
-cd backend && uv run alembic upgrade head && uv run uvicorn app.main:app --reload
+## Privacy Rules
+- `periods.csv` is gitignored. **Never read, print, or display period data to the console.** This includes dates, durations, or any content from the CSV or API responses.
+- `.env` contains `API_KEY` — gitignored, never commit or print.
 
-# iOS (requires Xcode with iOS SDK)
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project PeriodTracker/PeriodTracker.xcodeproj -scheme PeriodTracker -destination 'platform=iOS Simulator,name=iPhone 16e' build
-```
+## Deployment
+- **Backend:** Railway auto-deploys from `backend/` directory. Dockerfile runs `alembic upgrade head` then uvicorn on `$PORT`.
+- **Env vars on Railway:** `DATABASE_URL` (from Postgres addon), `API_KEY` (user-chosen password)
+- **Remote:** `https://github.com/dividing-by-zaro/ios-moonthread.git`
+- **Production URL:** `https://your-backend-url.example.com`
