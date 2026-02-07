@@ -11,6 +11,11 @@ class PeriodEnd(BaseModel):
     end_date: date
 
 
+class PeriodUpdate(BaseModel):
+    start_date: date
+    end_date: date | None = None
+
+
 class PeriodResponse(BaseModel):
     id: int
     start_date: date

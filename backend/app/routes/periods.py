@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas import PeriodCreate, PeriodEnd, PeriodResponse, PeriodStats
+from app.schemas import PeriodCreate, PeriodEnd, PeriodResponse, PeriodStats, PeriodUpdate
 from app.services.period_service import (
     create_period,
+    delete_period,
     end_period,
     get_stats,
     list_periods,
+    update_period,
 )
 
 router = APIRouter(prefix="/periods", tags=["periods"])
@@ -40,6 +42,28 @@ async def patch_period(
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/{period_id}", response_model=PeriodResponse)
+async def put_period(
+    period_id: int, body: PeriodUpdate, db: AsyncSession = Depends(get_db)
+):
+    try:
+        return await update_period(db, period_id, body.start_date, body.end_date)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{period_id}", status_code=204)
+async def remove_period(
+    period_id: int, db: AsyncSession = Depends(get_db)
+):
+    try:
+        await delete_period(db, period_id)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/stats", response_model=PeriodStats)

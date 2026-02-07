@@ -42,6 +42,35 @@ async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date) 
     return period
 
 
+async def update_period(
+    db: AsyncSession,
+    period_id: int,
+    start_date: datetime.date,
+    end_date: datetime.date | None,
+) -> Period:
+    result = await db.execute(select(Period).where(Period.id == period_id))
+    period = result.scalar_one_or_none()
+    if not period:
+        raise LookupError("Period not found")
+    if end_date is not None and end_date < start_date:
+        raise ValueError("end_date must be >= start_date")
+
+    period.start_date = start_date
+    period.end_date = end_date
+    await db.commit()
+    await db.refresh(period)
+    return period
+
+
+async def delete_period(db: AsyncSession, period_id: int) -> None:
+    result = await db.execute(select(Period).where(Period.id == period_id))
+    period = result.scalar_one_or_none()
+    if not period:
+        raise LookupError("Period not found")
+    await db.delete(period)
+    await db.commit()
+
+
 async def get_stats(db: AsyncSession) -> PeriodStats:
     result = await db.execute(select(Period).order_by(Period.start_date.asc()))
     periods = list(result.scalars().all())

@@ -34,6 +34,7 @@
 		AA000025 /* PeriodVariationChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000025 /* PeriodVariationChart.swift */; };
 		AA000026 /* RegularityGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000026 /* RegularityGauge.swift */; };
 		AA000027 /* DayOfWeekChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000027 /* DayOfWeekChart.swift */; };
+		AA000028 /* EditPeriodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000028 /* EditPeriodSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 		AB000025 /* PeriodVariationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodVariationChart.swift; sourceTree = "<group>"; };
 		AB000026 /* RegularityGauge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegularityGauge.swift; sourceTree = "<group>"; };
 		AB000027 /* DayOfWeekChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayOfWeekChart.swift; sourceTree = "<group>"; };
+		AB000028 /* EditPeriodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPeriodSheet.swift; sourceTree = "<group>"; };
 		AC000001 /* PeriodTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeriodTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -196,6 +198,7 @@
 				AB000017 /* LogView.swift */,
 				AB000018 /* PeriodRow.swift */,
 				AB000019 /* StatsCard.swift */,
+				AB000028 /* EditPeriodSheet.swift */,
 			);
 			path = Log;
 			sourceTree = "<group>";
@@ -295,6 +298,7 @@
 				AA000025 /* PeriodVariationChart.swift in Sources */,
 				AA000026 /* RegularityGauge.swift in Sources */,
 				AA000027 /* DayOfWeekChart.swift in Sources */,
+				AA000028 /* EditPeriodSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

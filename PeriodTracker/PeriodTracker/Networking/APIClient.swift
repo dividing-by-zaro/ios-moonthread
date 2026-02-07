@@ -93,7 +93,7 @@ actor APIClient {
         }
 
         switch http.statusCode {
-        case 200...201: return data
+        case 200...204: return data
         case 401: throw APIError.unauthorized
         case 404: throw APIError.notFound
         case 409:
@@ -134,6 +134,20 @@ actor APIClient {
         } catch {
             throw APIError.decodingError(error)
         }
+    }
+
+    func updatePeriod(id: Int, startDate: Date, endDate: Date?) async throws -> Period {
+        struct Body: Encodable { let start_date: Date; let end_date: Date? }
+        let data = try await request("PUT", path: "/periods/\(id)", body: Body(start_date: startDate, end_date: endDate))
+        do {
+            return try decoder.decode(Period.self, from: data)
+        } catch {
+            throw APIError.decodingError(error)
+        }
+    }
+
+    func deletePeriod(id: Int) async throws {
+        _ = try await request("DELETE", path: "/periods/\(id)")
     }
 
     func fetchStats() async throws -> PeriodStats {

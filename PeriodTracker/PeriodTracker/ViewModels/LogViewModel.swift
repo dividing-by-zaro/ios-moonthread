@@ -25,4 +25,28 @@ class LogViewModel {
         }
         isLoading = false
     }
+
+    func deletePeriod(_ period: Period) async {
+        do {
+            try await APIClient.shared.deletePeriod(id: period.id)
+            await load()
+        } catch let error as APIError {
+            if case .unauthorized = error { showUnauthorized = true }
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func updatePeriod(_ period: Period, startDate: Date, endDate: Date?) async {
+        do {
+            _ = try await APIClient.shared.updatePeriod(id: period.id, startDate: startDate, endDate: endDate)
+            await load()
+        } catch let error as APIError {
+            if case .unauthorized = error { showUnauthorized = true }
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }
