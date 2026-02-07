@@ -27,6 +27,13 @@
 		AA000018 /* PeriodRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000018 /* PeriodRow.swift */; };
 		AA000019 /* StatsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000019 /* StatsCard.swift */; };
 		AA000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB000020 /* Assets.xcassets */; };
+		AA000021 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000021 /* StatsViewModel.swift */; };
+		AA000022 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000022 /* StatsView.swift */; };
+		AA000023 /* CycleLengthChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000023 /* CycleLengthChart.swift */; };
+		AA000024 /* MonthlyDaysChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000024 /* MonthlyDaysChart.swift */; };
+		AA000025 /* PeriodVariationChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000025 /* PeriodVariationChart.swift */; };
+		AA000026 /* RegularityGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000026 /* RegularityGauge.swift */; };
+		AA000027 /* DayOfWeekChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000027 /* DayOfWeekChart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +57,13 @@
 		AB000018 /* PeriodRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodRow.swift; sourceTree = "<group>"; };
 		AB000019 /* StatsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCard.swift; sourceTree = "<group>"; };
 		AB000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AB000021 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
+		AB000022 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		AB000023 /* CycleLengthChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleLengthChart.swift; sourceTree = "<group>"; };
+		AB000024 /* MonthlyDaysChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyDaysChart.swift; sourceTree = "<group>"; };
+		AB000025 /* PeriodVariationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodVariationChart.swift; sourceTree = "<group>"; };
+		AB000026 /* RegularityGauge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegularityGauge.swift; sourceTree = "<group>"; };
+		AB000027 /* DayOfWeekChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayOfWeekChart.swift; sourceTree = "<group>"; };
 		AC000001 /* PeriodTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeriodTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -120,6 +134,7 @@
 				AB000009 /* HomeViewModel.swift */,
 				AB000010 /* CalendarViewModel.swift */,
 				AB000011 /* LogViewModel.swift */,
+				AB000021 /* StatsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -129,6 +144,7 @@
 			children = (
 				AE000008 /* Home */,
 				AE000009 /* Calendar */,
+				AE000012 /* Stats */,
 				AE000011 /* Log */,
 			);
 			path = Views;
@@ -151,6 +167,19 @@
 				AB000016 /* DayCell.swift */,
 			);
 			path = Calendar;
+			sourceTree = "<group>";
+		};
+		AE000012 /* Stats */ = {
+			isa = PBXGroup;
+			children = (
+				AB000022 /* StatsView.swift */,
+				AB000023 /* CycleLengthChart.swift */,
+				AB000024 /* MonthlyDaysChart.swift */,
+				AB000025 /* PeriodVariationChart.swift */,
+				AB000026 /* RegularityGauge.swift */,
+				AB000027 /* DayOfWeekChart.swift */,
+			);
+			path = Stats;
 			sourceTree = "<group>";
 		};
 		AE000010 /* Products */ = {
@@ -259,6 +288,13 @@
 				AA000017 /* LogView.swift in Sources */,
 				AA000018 /* PeriodRow.swift in Sources */,
 				AA000019 /* StatsCard.swift in Sources */,
+				AA000021 /* StatsViewModel.swift in Sources */,
+				AA000022 /* StatsView.swift in Sources */,
+				AA000023 /* CycleLengthChart.swift in Sources */,
+				AA000024 /* MonthlyDaysChart.swift in Sources */,
+				AA000025 /* PeriodVariationChart.swift in Sources */,
+				AA000026 /* RegularityGauge.swift in Sources */,
+				AA000027 /* DayOfWeekChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

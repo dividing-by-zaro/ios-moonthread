@@ -15,6 +15,11 @@ struct ContentView: View {
                     Label("Calendar", systemImage: "calendar")
                 }
 
+            StatsView(isAuthenticated: $isAuthenticated)
+                .tabItem {
+                    Label("Stats", systemImage: "chart.xyaxis.line")
+                }
+
             LogView(isAuthenticated: $isAuthenticated)
                 .tabItem {
                     Label("Log", systemImage: "list.bullet")

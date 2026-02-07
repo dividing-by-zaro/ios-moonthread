@@ -46,10 +46,12 @@ FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 
 - **Networking:** `APIClient` is an `actor` singleton. Reads API key from iOS Keychain, sends as `X-API-Key` header. Base URL hardcoded to Railway production (no debug/release split).
-- **Auth flow:** `PasswordEntryView` → saves to Keychain → validates via `/periods/stats` → 401 resets back to password screen. All three tab ViewModels watch for 401 and trigger re-auth.
-- **MVVM:** Each tab has an `@Observable` ViewModel (`HomeViewModel`, `CalendarViewModel`, `LogViewModel`). Views bind to these.
+- **Auth flow:** `PasswordEntryView` → saves to Keychain → validates via `/periods/stats` → 401 resets back to password screen. All four tab ViewModels watch for 401 and trigger re-auth.
+- **MVVM:** Each tab has an `@Observable` ViewModel (`HomeViewModel`, `CalendarViewModel`, `StatsViewModel`, `LogViewModel`). Views bind to these.
+- **Data refresh:** All views reload from the server on foreground via `willEnterForegroundNotification`.
 - **Theme:** Smoky green dark palette in `ColorTokens.swift`, rounded typography in `Typography.swift`. Forced dark mode at app root.
-- **Tabs:** Home (period status + start/end toggle), Calendar (infinite-scroll multi-month grid with period highlighting), Log (avg stats + period history list)
+- **Tabs:** Home (period status + start/end toggle), Calendar (infinite-scroll multi-month grid with period highlighting), Stats (5 chart visualizations using Swift Charts + custom SwiftUI), Log (avg stats + period history list)
+- **Stats tab:** Year picker with "All" default. Charts: Cycle Length Trend (line+area), Days per Month (bar), Period Duration Variation (scatter+range band), Cycle Regularity Gauge (custom arc, year-only), Start Day Patterns (horizontal bar, all-years-only). Uses `ChartCard` wrapper. `StatsViewModel` computes all chart data as derived properties from `selectedYear`.
 - **Bundle ID:** `com.izaro.moonthread`
 - **Xcode project:** Hand-written `.pbxproj` — when adding Swift files, they must be registered in both the PBXFileReference and PBXBuildFile sections.
 

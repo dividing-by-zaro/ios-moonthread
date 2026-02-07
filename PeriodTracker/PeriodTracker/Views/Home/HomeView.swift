@@ -49,6 +49,9 @@ struct HomeView: View {
             }
         }
         .task { await vm.load() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            Task { await vm.load() }
+        }
         .onChange(of: vm.showUnauthorized) { _, val in
             if val { isAuthenticated = false }
         }
