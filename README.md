@@ -4,7 +4,8 @@ A period tracking iOS app with cloud backup.
 
 ### Features
 - [x] Start/end period tracking with single tap
-- [x] Infinite-scroll calendar with multiple months and period days highlighted
+- [x] Infinite-scroll calendar with period highlighting and predicted future periods (dashed gold)
+- [x] Predicted remaining days for in-progress periods
 - [x] Stats dashboard with 5 chart visualizations (cycle trends, monthly breakdown, duration variation, regularity gauge, start day patterns)
 - [x] Year picker with "All years" default view
 - [x] Full period history log with swipe-to-edit and swipe-to-delete

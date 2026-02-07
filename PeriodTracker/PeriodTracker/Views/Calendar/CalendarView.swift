@@ -37,21 +37,27 @@ struct CalendarView: View {
                         .foregroundStyle(AppColor.error)
                     Spacer()
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 24) {
-                            ForEach(vm.months, id: \.self) { month in
-                                MonthSection(
-                                    month: month,
-                                    vm: vm,
-                                    columns: columns
-                                )
-                                .onAppear {
-                                    vm.loadMoreIfNeeded(currentMonth: month)
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 24) {
+                                ForEach(vm.months, id: \.self) { month in
+                                    MonthSection(
+                                        month: month,
+                                        vm: vm,
+                                        columns: columns
+                                    )
+                                    .id(month)
+                                    .onAppear {
+                                        vm.loadMoreIfNeeded(currentMonth: month)
+                                    }
                                 }
                             }
+                            .padding(.top, 8)
+                            .padding(.bottom, 32)
                         }
-                        .padding(.top, 8)
-                        .padding(.bottom, 32)
+                        .onAppear {
+                            proxy.scrollTo(vm.currentMonthStart, anchor: .top)
+                        }
                     }
                 }
             }
@@ -85,7 +91,8 @@ private struct MonthSection: View {
                         DayCell(
                             date: date,
                             isPeriodDay: vm.isPeriodDay(date),
-                            isToday: vm.isToday(date)
+                            isToday: vm.isToday(date),
+                            isPredicted: vm.isPredictedDay(date)
                         )
                     } else {
                         Color.clear.frame(width: 36, height: 36)
