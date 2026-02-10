@@ -14,6 +14,7 @@ A period tracking iOS app with cloud backup.
 - [x] Password-based API key authentication with iOS Keychain storage
 - [x] CSV import utility with duplicate detection and data validation
 - [x] Smoky green ultra-modern dark theme with pulsing animations
+- [x] Backend security hardening: timing-safe auth, rate limiting, date validation, overlap detection, stats caching
 
 ### Stack
 - **iOS:** SwiftUI, iOS 17+, MVVM

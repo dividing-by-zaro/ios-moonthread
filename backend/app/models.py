@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Date, DateTime, Integer, func
+from sqlalchemy import Date, DateTime, Integer, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -10,6 +10,7 @@ class Base(DeclarativeBase):
 
 class Period(Base):
     __tablename__ = "periods"
+    __table_args__ = (UniqueConstraint("start_date", name="uq_periods_start_date"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)

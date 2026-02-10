@@ -35,12 +35,14 @@ Two independent codebases in one repo: a Python backend and a SwiftUI iOS app co
 FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 
 - **Entry point:** `app/main.py` — mounts period routes with API key auth dependency; `/health` is unauthenticated
-- **Auth:** `X-API-Key` header checked against `API_KEY` env var on every request (except `/health`)
-- **Data model:** Single `periods` table — `id`, `start_date`, `end_date` (NULL = ongoing), `created_at`
+- **Auth:** `X-API-Key` header checked via `hmac.compare_digest` (timing-safe) against `API_KEY` env var. Rate-limited to 10 req/min per IP via `slowapi`. Config rejects default `dev-key` when `RAILWAY_ENVIRONMENT` is set.
+- **Data model:** Single `periods` table — `id`, `start_date` (UNIQUE), `end_date` (NULL = ongoing), `created_at`
 - **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)
 - **Config:** `app/config.py` auto-converts Railway's `postgresql://` to `postgresql+asyncpg://`
-- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile
-- **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle
+- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration 002 adds UNIQUE constraint on `start_date`.
+- **Validation:** All date inputs are bounded (10 years past to today). Overlap detection (`_check_overlap`) runs on create/update/end to prevent intersecting periods. DB-level UNIQUE on `start_date` guards against race conditions. `IntegrityError` caught and converted to `ValueError`.
+- **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle. Stats response is cached in-memory for 30s; any mutation invalidates the cache.
+- **Error responses:** Routes return generic error messages (not internal exception text) to avoid information disclosure.
 - **CRUD:** Full period CRUD — POST (create), PATCH (end), PUT (update start/end dates), DELETE. Schemas: `PeriodCreate`, `PeriodEnd`, `PeriodUpdate`, `PeriodResponse`.
 
 ### iOS (`PeriodTracker/`)

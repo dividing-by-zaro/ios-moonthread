@@ -28,8 +28,8 @@ async def start_period(
 ):
     try:
         return await create_period(db, body.start_date)
-    except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+    except ValueError:
+        raise HTTPException(status_code=409, detail="Conflict with existing period")
 
 
 @router.patch("/{period_id}", response_model=PeriodResponse)
@@ -38,10 +38,10 @@ async def patch_period(
 ):
     try:
         return await end_period(db, period_id, body.end_date)
-    except LookupError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Period not found")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date")
 
 
 @router.put("/{period_id}", response_model=PeriodResponse)
@@ -50,10 +50,10 @@ async def put_period(
 ):
     try:
         return await update_period(db, period_id, body.start_date, body.end_date)
-    except LookupError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Period not found")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date")
 
 
 @router.delete("/{period_id}", status_code=204)
@@ -62,8 +62,8 @@ async def remove_period(
 ):
     try:
         await delete_period(db, period_id)
-    except LookupError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Period not found")
 
 
 @router.get("/stats", response_model=PeriodStats)
