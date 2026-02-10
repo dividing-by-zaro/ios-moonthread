@@ -15,6 +15,7 @@ A period tracking iOS app with cloud backup.
 - [x] CSV import utility with duplicate detection and data validation
 - [x] Smoky green ultra-modern dark theme with pulsing animations
 - [x] Backend security hardening: timing-safe auth, rate limiting, date validation, overlap detection, stats caching, API docs disabled
+- [x] Demo mode via `DEMO_API_KEY` — read-only access to seeded sample data for screenshots
 
 ### Stack
 - **iOS:** SwiftUI, iOS 17+, MVVM

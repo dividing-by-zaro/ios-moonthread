@@ -10,8 +10,8 @@ from app.schemas import PeriodStats
 
 MAX_DATE_RANGE_YEARS = 10
 
-# Simple in-memory stats cache
-_stats_cache: dict[str, object] = {"value": None, "expires_at": 0.0}
+# Owner-keyed stats cache: { owner: {"value": ..., "expires_at": ...} }
+_stats_cache: dict[str, dict[str, object]] = {}
 _STATS_TTL_SECONDS = 30
 
 
@@ -27,12 +27,14 @@ async def _check_overlap(
     db: AsyncSession,
     start_date: datetime.date,
     end_date: datetime.date | None,
+    owner: str,
     exclude_id: int | None = None,
 ) -> None:
-    """Raise ValueError if the given range overlaps any existing period."""
+    """Raise ValueError if the given range overlaps any existing period for this owner."""
     effective_end = end_date if end_date is not None else datetime.date.max
     # A overlaps B when A.start <= B.end AND A.end >= B.start
     conditions = [
+        Period.owner == owner,
         Period.start_date <= effective_end,
     ]
     # For periods with NULL end_date (open), they extend to infinity
@@ -48,28 +50,31 @@ async def _check_overlap(
         raise ValueError("Date range overlaps with an existing period")
 
 
-def _invalidate_stats_cache() -> None:
-    _stats_cache["value"] = None
-    _stats_cache["expires_at"] = 0.0
+def _invalidate_stats_cache(owner: str) -> None:
+    _stats_cache.pop(owner, None)
 
 
-async def list_periods(db: AsyncSession) -> list[Period]:
-    result = await db.execute(select(Period).order_by(Period.start_date.desc()))
+async def list_periods(db: AsyncSession, owner: str) -> list[Period]:
+    result = await db.execute(
+        select(Period).where(Period.owner == owner).order_by(Period.start_date.desc())
+    )
     return list(result.scalars().all())
 
 
-async def create_period(db: AsyncSession, start_date: datetime.date) -> Period:
+async def create_period(db: AsyncSession, start_date: datetime.date, owner: str) -> Period:
     _validate_date_range(start_date)
 
-    # Check no open period exists
-    result = await db.execute(select(Period).where(Period.end_date.is_(None)))
+    # Check no open period exists for this owner
+    result = await db.execute(
+        select(Period).where(Period.owner == owner, Period.end_date.is_(None))
+    )
     open_period = result.scalar_one_or_none()
     if open_period:
         raise ValueError("An open period already exists. End it before starting a new one.")
 
-    await _check_overlap(db, start_date, None)
+    await _check_overlap(db, start_date, None, owner)
 
-    period = Period(start_date=start_date)
+    period = Period(start_date=start_date, owner=owner)
     db.add(period)
     try:
         await db.commit()
@@ -77,14 +82,16 @@ async def create_period(db: AsyncSession, start_date: datetime.date) -> Period:
         await db.rollback()
         raise ValueError("A period with this start date already exists")
     await db.refresh(period)
-    _invalidate_stats_cache()
+    _invalidate_stats_cache(owner)
     return period
 
 
-async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date) -> Period:
+async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date, owner: str) -> Period:
     _validate_date_range(end_date)
 
-    result = await db.execute(select(Period).where(Period.id == period_id))
+    result = await db.execute(
+        select(Period).where(Period.id == period_id, Period.owner == owner)
+    )
     period = result.scalar_one_or_none()
     if not period:
         raise LookupError("Period not found")
@@ -93,12 +100,12 @@ async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date) 
     if end_date < period.start_date:
         raise ValueError("end_date must be >= start_date")
 
-    await _check_overlap(db, period.start_date, end_date, exclude_id=period_id)
+    await _check_overlap(db, period.start_date, end_date, owner, exclude_id=period_id)
 
     period.end_date = end_date
     await db.commit()
     await db.refresh(period)
-    _invalidate_stats_cache()
+    _invalidate_stats_cache(owner)
     return period
 
 
@@ -107,19 +114,22 @@ async def update_period(
     period_id: int,
     start_date: datetime.date,
     end_date: datetime.date | None,
+    owner: str,
 ) -> Period:
     _validate_date_range(start_date)
     if end_date is not None:
         _validate_date_range(end_date)
 
-    result = await db.execute(select(Period).where(Period.id == period_id))
+    result = await db.execute(
+        select(Period).where(Period.id == period_id, Period.owner == owner)
+    )
     period = result.scalar_one_or_none()
     if not period:
         raise LookupError("Period not found")
     if end_date is not None and end_date < start_date:
         raise ValueError("end_date must be >= start_date")
 
-    await _check_overlap(db, start_date, end_date, exclude_id=period_id)
+    await _check_overlap(db, start_date, end_date, owner, exclude_id=period_id)
 
     period.start_date = start_date
     period.end_date = end_date
@@ -129,26 +139,31 @@ async def update_period(
         await db.rollback()
         raise ValueError("A period with this start date already exists")
     await db.refresh(period)
-    _invalidate_stats_cache()
+    _invalidate_stats_cache(owner)
     return period
 
 
-async def delete_period(db: AsyncSession, period_id: int) -> None:
-    result = await db.execute(select(Period).where(Period.id == period_id))
+async def delete_period(db: AsyncSession, period_id: int, owner: str) -> None:
+    result = await db.execute(
+        select(Period).where(Period.id == period_id, Period.owner == owner)
+    )
     period = result.scalar_one_or_none()
     if not period:
         raise LookupError("Period not found")
     await db.delete(period)
     await db.commit()
-    _invalidate_stats_cache()
+    _invalidate_stats_cache(owner)
 
 
-async def get_stats(db: AsyncSession) -> PeriodStats:
+async def get_stats(db: AsyncSession, owner: str) -> PeriodStats:
     now = time.monotonic()
-    if _stats_cache["value"] is not None and now < _stats_cache["expires_at"]:
-        return _stats_cache["value"]
+    cached = _stats_cache.get(owner)
+    if cached is not None and cached["value"] is not None and now < cached["expires_at"]:
+        return cached["value"]
 
-    result = await db.execute(select(Period).order_by(Period.start_date.asc()))
+    result = await db.execute(
+        select(Period).where(Period.owner == owner).order_by(Period.start_date.asc())
+    )
     periods = list(result.scalars().all())
 
     # Current open period
@@ -183,7 +198,6 @@ async def get_stats(db: AsyncSession) -> PeriodStats:
         predicted_next_start=predicted,
     )
 
-    _stats_cache["value"] = stats
-    _stats_cache["expires_at"] = now + _STATS_TTL_SECONDS
+    _stats_cache[owner] = {"value": stats, "expires_at": now + _STATS_TTL_SECONDS}
 
     return stats

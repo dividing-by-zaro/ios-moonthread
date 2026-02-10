@@ -1,8 +1,7 @@
-import datetime
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import verify_api_key
 from app.database import get_db
 from app.schemas import PeriodCreate, PeriodEnd, PeriodResponse, PeriodStats, PeriodUpdate
 from app.services.period_service import (
@@ -17,27 +16,42 @@ from app.services.period_service import (
 router = APIRouter(prefix="/periods", tags=["periods"])
 
 
+def _reject_demo(owner: str) -> None:
+    if owner == "demo":
+        raise HTTPException(status_code=403, detail="Demo account is read-only")
+
+
 @router.get("", response_model=list[PeriodResponse])
-async def get_periods(db: AsyncSession = Depends(get_db)):
-    return await list_periods(db)
+async def get_periods(
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
+):
+    return await list_periods(db, owner)
 
 
 @router.post("", response_model=PeriodResponse, status_code=201)
 async def start_period(
-    body: PeriodCreate, db: AsyncSession = Depends(get_db)
+    body: PeriodCreate,
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
 ):
+    _reject_demo(owner)
     try:
-        return await create_period(db, body.start_date)
+        return await create_period(db, body.start_date, owner)
     except ValueError:
         raise HTTPException(status_code=409, detail="Conflict with existing period")
 
 
 @router.patch("/{period_id}", response_model=PeriodResponse)
 async def patch_period(
-    period_id: int, body: PeriodEnd, db: AsyncSession = Depends(get_db)
+    period_id: int,
+    body: PeriodEnd,
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
 ):
+    _reject_demo(owner)
     try:
-        return await end_period(db, period_id, body.end_date)
+        return await end_period(db, period_id, body.end_date, owner)
     except LookupError:
         raise HTTPException(status_code=404, detail="Period not found")
     except ValueError:
@@ -46,10 +60,14 @@ async def patch_period(
 
 @router.put("/{period_id}", response_model=PeriodResponse)
 async def put_period(
-    period_id: int, body: PeriodUpdate, db: AsyncSession = Depends(get_db)
+    period_id: int,
+    body: PeriodUpdate,
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
 ):
+    _reject_demo(owner)
     try:
-        return await update_period(db, period_id, body.start_date, body.end_date)
+        return await update_period(db, period_id, body.start_date, body.end_date, owner)
     except LookupError:
         raise HTTPException(status_code=404, detail="Period not found")
     except ValueError:
@@ -58,14 +76,20 @@ async def put_period(
 
 @router.delete("/{period_id}", status_code=204)
 async def remove_period(
-    period_id: int, db: AsyncSession = Depends(get_db)
+    period_id: int,
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
 ):
+    _reject_demo(owner)
     try:
-        await delete_period(db, period_id)
+        await delete_period(db, period_id, owner)
     except LookupError:
         raise HTTPException(status_code=404, detail="Period not found")
 
 
 @router.get("/stats", response_model=PeriodStats)
-async def period_stats(db: AsyncSession = Depends(get_db)):
-    return await get_stats(db)
+async def period_stats(
+    db: AsyncSession = Depends(get_db),
+    owner: str = Depends(verify_api_key),
+):
+    return await get_stats(db, owner)
