@@ -1,4 +1,4 @@
-"""add owner column and demo data
+"""create demo_periods table with seeded data
 
 Revision ID: 003
 Revises: 002
@@ -47,36 +47,29 @@ DEMO_PERIODS = [
 
 
 def upgrade() -> None:
-    op.add_column(
-        "periods",
-        sa.Column("owner", sa.String(10), nullable=False, server_default="user"),
-    )
-    op.drop_constraint("uq_periods_start_date", "periods", type_="unique")
-    op.create_unique_constraint(
-        "uq_periods_owner_start_date", "periods", ["owner", "start_date"]
+    op.create_table(
+        "demo_periods",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("start_date", sa.Date(), nullable=False),
+        sa.Column("end_date", sa.Date(), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+        ),
+        sa.UniqueConstraint("start_date", name="uq_demo_periods_start_date"),
     )
 
-    periods_table = sa.table(
-        "periods",
+    demo_table = sa.table(
+        "demo_periods",
         sa.column("start_date", sa.Date),
         sa.column("end_date", sa.Date),
-        sa.column("owner", sa.String),
     )
     op.bulk_insert(
-        periods_table,
-        [
-            {
-                "start_date": start,
-                "end_date": end,
-                "owner": "demo",
-            }
-            for start, end in DEMO_PERIODS
-        ],
+        demo_table,
+        [{"start_date": start, "end_date": end} for start, end in DEMO_PERIODS],
     )
 
 
 def downgrade() -> None:
-    op.execute("DELETE FROM periods WHERE owner = 'demo'")
-    op.drop_constraint("uq_periods_owner_start_date", "periods", type_="unique")
-    op.create_unique_constraint("uq_periods_start_date", "periods", ["start_date"])
-    op.drop_column("periods", "owner")
+    op.drop_table("demo_periods")

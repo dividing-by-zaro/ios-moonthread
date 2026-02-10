@@ -36,12 +36,12 @@ FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 
 - **Entry point:** `app/main.py` — mounts period routes; `/health` is unauthenticated. OpenAPI docs (`/docs`, `/redoc`, `/openapi.json`) are disabled in production.
 - **Auth:** `app/auth.py` — `verify_api_key` dependency checks `X-API-Key` header via `hmac.compare_digest` (timing-safe) against `API_KEY` and optionally `DEMO_API_KEY`. Returns `"user"` or `"demo"` owner string. Rate-limited to 10 req/min per IP via `slowapi`. Config rejects default `dev-key` when `RAILWAY_ENVIRONMENT` is set. Config validates `DEMO_API_KEY` differs from `API_KEY`.
-- **Multi-tenancy:** `owner` column (`String(10)`) on `periods` table scopes all data. Auth determines owner from API key. All queries filter by owner. Demo owner is read-only (mutations return 403). Stats cache is owner-keyed.
-- **Data model:** Single `periods` table — `id`, `start_date`, `end_date` (NULL = ongoing), `owner` (default `"user"`), `created_at`. UNIQUE constraint on `(owner, start_date)`.
+- **Demo mode:** Separate `demo_periods` table (identical schema to `periods`) with seeded sample data. `_model(owner)` helper in `period_service.py` returns `DemoPeriod` or `Period` based on owner. Demo owner is read-only (mutations return 403). Stats cache is owner-keyed.
+- **Data model:** `periods` table — `id`, `start_date` (UNIQUE), `end_date` (NULL = ongoing), `created_at`. `demo_periods` table — same schema, pre-seeded with 27 demo periods.
 - **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)
 - **Config:** `app/config.py` auto-converts Railway's `postgresql://` to `postgresql+asyncpg://`
-- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration 002 adds UNIQUE on `start_date`; migration 003 adds `owner` column, replaces constraint with `(owner, start_date)`, and bulk-inserts 27 demo periods.
-- **Validation:** All date inputs are bounded (10 years past to today). Overlap detection (`_check_overlap`) runs on create/update/end to prevent intersecting periods (scoped per owner). DB-level UNIQUE on `(owner, start_date)` guards against race conditions. `IntegrityError` caught and converted to `ValueError`.
+- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration 002 adds UNIQUE on `start_date`; migration 003 creates `demo_periods` table and seeds 27 demo periods.
+- **Validation:** All date inputs are bounded (10 years past to today). Overlap detection (`_check_overlap`) runs on create/update/end to prevent intersecting periods. DB-level UNIQUE on `start_date` guards against race conditions. `IntegrityError` caught and converted to `ValueError`.
 - **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle. Stats response is cached in-memory for 30s per owner; any mutation invalidates that owner's cache.
 - **Error responses:** Routes return generic error messages (not internal exception text) to avoid information disclosure.
 - **CRUD:** Full period CRUD — POST (create), PATCH (end), PUT (update start/end dates), DELETE. Schemas: `PeriodCreate`, `PeriodEnd`, `PeriodUpdate`, `PeriodResponse`.

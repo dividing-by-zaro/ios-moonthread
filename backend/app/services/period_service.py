@@ -5,7 +5,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Period
+from app.models import DemoPeriod, Period
 from app.schemas import PeriodStats
 
 MAX_DATE_RANGE_YEARS = 10
@@ -13,6 +13,10 @@ MAX_DATE_RANGE_YEARS = 10
 # Owner-keyed stats cache: { owner: {"value": ..., "expires_at": ...} }
 _stats_cache: dict[str, dict[str, object]] = {}
 _STATS_TTL_SECONDS = 30
+
+
+def _model(owner: str):
+    return DemoPeriod if owner == "demo" else Period
 
 
 def _validate_date_range(d: datetime.date) -> None:
@@ -30,22 +34,22 @@ async def _check_overlap(
     owner: str,
     exclude_id: int | None = None,
 ) -> None:
-    """Raise ValueError if the given range overlaps any existing period for this owner."""
+    """Raise ValueError if the given range overlaps any existing period."""
+    M = _model(owner)
     effective_end = end_date if end_date is not None else datetime.date.max
     # A overlaps B when A.start <= B.end AND A.end >= B.start
     conditions = [
-        Period.owner == owner,
-        Period.start_date <= effective_end,
+        M.start_date <= effective_end,
     ]
     # For periods with NULL end_date (open), they extend to infinity
     # so they always satisfy "existing.end >= start_date".
     # For periods with an end_date, check normally.
     conditions.append(
-        (Period.end_date >= start_date) | (Period.end_date.is_(None))
+        (M.end_date >= start_date) | (M.end_date.is_(None))
     )
     if exclude_id is not None:
-        conditions.append(Period.id != exclude_id)
-    result = await db.execute(select(Period.id).where(and_(*conditions)).limit(1))
+        conditions.append(M.id != exclude_id)
+    result = await db.execute(select(M.id).where(and_(*conditions)).limit(1))
     if result.scalar_one_or_none() is not None:
         raise ValueError("Date range overlaps with an existing period")
 
@@ -54,19 +58,21 @@ def _invalidate_stats_cache(owner: str) -> None:
     _stats_cache.pop(owner, None)
 
 
-async def list_periods(db: AsyncSession, owner: str) -> list[Period]:
+async def list_periods(db: AsyncSession, owner: str) -> list:
+    M = _model(owner)
     result = await db.execute(
-        select(Period).where(Period.owner == owner).order_by(Period.start_date.desc())
+        select(M).order_by(M.start_date.desc())
     )
     return list(result.scalars().all())
 
 
-async def create_period(db: AsyncSession, start_date: datetime.date, owner: str) -> Period:
+async def create_period(db: AsyncSession, start_date: datetime.date, owner: str):
+    M = _model(owner)
     _validate_date_range(start_date)
 
-    # Check no open period exists for this owner
+    # Check no open period exists
     result = await db.execute(
-        select(Period).where(Period.owner == owner, Period.end_date.is_(None))
+        select(M).where(M.end_date.is_(None))
     )
     open_period = result.scalar_one_or_none()
     if open_period:
@@ -74,7 +80,7 @@ async def create_period(db: AsyncSession, start_date: datetime.date, owner: str)
 
     await _check_overlap(db, start_date, None, owner)
 
-    period = Period(start_date=start_date, owner=owner)
+    period = M(start_date=start_date)
     db.add(period)
     try:
         await db.commit()
@@ -86,11 +92,12 @@ async def create_period(db: AsyncSession, start_date: datetime.date, owner: str)
     return period
 
 
-async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date, owner: str) -> Period:
+async def end_period(db: AsyncSession, period_id: int, end_date: datetime.date, owner: str):
+    M = _model(owner)
     _validate_date_range(end_date)
 
     result = await db.execute(
-        select(Period).where(Period.id == period_id, Period.owner == owner)
+        select(M).where(M.id == period_id)
     )
     period = result.scalar_one_or_none()
     if not period:
@@ -115,13 +122,14 @@ async def update_period(
     start_date: datetime.date,
     end_date: datetime.date | None,
     owner: str,
-) -> Period:
+):
+    M = _model(owner)
     _validate_date_range(start_date)
     if end_date is not None:
         _validate_date_range(end_date)
 
     result = await db.execute(
-        select(Period).where(Period.id == period_id, Period.owner == owner)
+        select(M).where(M.id == period_id)
     )
     period = result.scalar_one_or_none()
     if not period:
@@ -144,8 +152,9 @@ async def update_period(
 
 
 async def delete_period(db: AsyncSession, period_id: int, owner: str) -> None:
+    M = _model(owner)
     result = await db.execute(
-        select(Period).where(Period.id == period_id, Period.owner == owner)
+        select(M).where(M.id == period_id)
     )
     period = result.scalar_one_or_none()
     if not period:
@@ -156,13 +165,14 @@ async def delete_period(db: AsyncSession, period_id: int, owner: str) -> None:
 
 
 async def get_stats(db: AsyncSession, owner: str) -> PeriodStats:
+    M = _model(owner)
     now = time.monotonic()
     cached = _stats_cache.get(owner)
     if cached is not None and cached["value"] is not None and now < cached["expires_at"]:
         return cached["value"]
 
     result = await db.execute(
-        select(Period).where(Period.owner == owner).order_by(Period.start_date.asc())
+        select(M).order_by(M.start_date.asc())
     )
     periods = list(result.scalars().all())
 
