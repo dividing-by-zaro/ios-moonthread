@@ -95,8 +95,10 @@ struct PasswordEntryView: View {
                     isLoading = false
                 }
             } catch {
+                KeychainHelper.delete()
                 await MainActor.run {
-                    isAuthenticated = true
+                    errorMessage = "Connection failed. Check your network and try again."
+                    isLoading = false
                 }
             }
         }
