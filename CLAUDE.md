@@ -34,7 +34,7 @@ Two independent codebases in one repo: a Python backend and a SwiftUI iOS app co
 ### Backend (`backend/`)
 FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 
-- **Entry point:** `app/main.py` — mounts period routes with API key auth dependency; `/health` is unauthenticated
+- **Entry point:** `app/main.py` — mounts period routes with API key auth dependency; `/health` is unauthenticated. OpenAPI docs (`/docs`, `/redoc`, `/openapi.json`) are disabled in production.
 - **Auth:** `X-API-Key` header checked via `hmac.compare_digest` (timing-safe) against `API_KEY` env var. Rate-limited to 10 req/min per IP via `slowapi`. Config rejects default `dev-key` when `RAILWAY_ENVIRONMENT` is set.
 - **Data model:** Single `periods` table — `id`, `start_date` (UNIQUE), `end_date` (NULL = ongoing), `created_at`
 - **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)

@@ -12,7 +12,7 @@ from app.routes.periods import router as periods_router
 
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI(title="Period Tracker API")
+app = FastAPI(title="Period Tracker API", docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
 
 
