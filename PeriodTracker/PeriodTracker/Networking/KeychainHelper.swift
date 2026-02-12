@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 enum KeychainHelper {
-    private static let service = "com.izaro.moonthread.apikey"
+    private static let service = "\(Bundle.main.bundleIdentifier ?? "com.moonthread").apikey"
     private static let account = "api-key"
 
     static func save(password: String) {

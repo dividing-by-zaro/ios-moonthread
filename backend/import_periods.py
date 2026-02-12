@@ -15,7 +15,7 @@ import httpx
 def main():
     parser = argparse.ArgumentParser(description="Import periods from CSV")
     parser.add_argument("csv_file", help="Path to CSV file")
-    parser.add_argument("--url", default="https://your-backend-url.example.com")
+    parser.add_argument("--url", required=True, help="Backend API URL")
     parser.add_argument("--api-key", default=None)
     args = parser.parse_args()
 

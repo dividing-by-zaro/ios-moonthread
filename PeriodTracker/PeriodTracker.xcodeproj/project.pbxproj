@@ -67,6 +67,7 @@
 		AB000027 /* DayOfWeekChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayOfWeekChart.swift; sourceTree = "<group>"; };
 		AB000028 /* EditPeriodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPeriodSheet.swift; sourceTree = "<group>"; };
 		AC000001 /* PeriodTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeriodTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB000029 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +84,7 @@
 		AE000001 = {
 			isa = PBXGroup;
 			children = (
+				AB000029 /* Local.xcconfig */,
 				AE000002 /* PeriodTracker */,
 				AE000010 /* Products */,
 			);
@@ -411,12 +413,12 @@
 		};
 		AG000005 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB000029 /* Local.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeriodTracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -429,7 +431,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.izaro.moonthread;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -439,12 +440,12 @@
 		};
 		AG000006 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB000029 /* Local.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeriodTracker/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -457,7 +458,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.izaro.moonthread;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

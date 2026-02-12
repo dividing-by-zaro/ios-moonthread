@@ -23,7 +23,12 @@ enum APIError: Error, LocalizedError {
 actor APIClient {
     static let shared = APIClient()
 
-    private var baseURL = "https://your-backend-url.example.com"
+    private var baseURL: String = {
+        guard let url = Bundle.main.infoDictionary?["APIBaseURL"] as? String, !url.isEmpty else {
+            fatalError("APIBaseURL not set — copy Local.xcconfig.example to Local.xcconfig and fill in your backend URL")
+        }
+        return url
+    }()
 
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()

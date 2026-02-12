@@ -105,7 +105,7 @@ class CalendarViewModel {
         if let current = sorted.last, current.isActive {
             let start = calendar.startOfDay(for: current.startDate)
             let elapsedDays = calendar.dateComponents([.day], from: start, to: today).day ?? 0
-            for d in (elapsedDays + 1)..<roundedDuration {
+            for d in (elapsedDays + 1)..<max(elapsedDays + 1, roundedDuration) {
                 if let day = calendar.date(byAdding: .day, value: d, to: start) {
                     days.insert(day)
                 }

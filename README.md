@@ -35,12 +35,16 @@ uv run uvicorn app.main:app --reload
 ```
 
 **iOS:**
+```bash
+cp PeriodTracker/Local.xcconfig.example PeriodTracker/Local.xcconfig
+# Edit Local.xcconfig with your Apple Team ID, backend URL, and bundle ID
+```
 Open `PeriodTracker/PeriodTracker.xcodeproj` in Xcode, build and run.
 
 **CSV Import:**
 ```bash
 cd backend
-uv run import_periods.py periods.csv --api-key YOUR_KEY
+uv run import_periods.py periods.csv --url https://your-backend-url.example.com --api-key YOUR_KEY
 ```
 
 CSV format: `start_date,end_date` with `YYYY-MM-DD` dates. Leave `end_date` blank for an ongoing period.

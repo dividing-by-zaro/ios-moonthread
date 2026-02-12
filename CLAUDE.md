@@ -10,7 +10,7 @@ cd backend
 uv sync                                    # Install dependencies
 uv run alembic upgrade head                # Run migrations (requires running PostgreSQL)
 uv run uvicorn app.main:app --reload       # Start dev server on :8000
-uv run import_periods.py periods.csv       # Import CSV data (reads API_KEY from .env)
+uv run import_periods.py periods.csv --url $URL --api-key $KEY  # Import CSV data
 ```
 
 ### iOS
@@ -24,7 +24,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 # Install & launch in simulator
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl install booted \
   ~/Library/Developer/Xcode/DerivedData/PeriodTracker-*/Build/Products/Debug-iphonesimulator/PeriodTracker.app
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl launch booted com.izaro.moonthread
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl launch booted <PRODUCT_BUNDLE_IDENTIFIER>
 ```
 
 ## Architecture
@@ -49,7 +49,7 @@ FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 ### iOS (`PeriodTracker/`)
 SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 
-- **Networking:** `APIClient` is an `actor` singleton. Reads API key from iOS Keychain, sends as `X-API-Key` header. Base URL hardcoded to Railway production (no debug/release split).
+- **Networking:** `APIClient` is an `actor` singleton. Reads API key from iOS Keychain, sends as `X-API-Key` header. Base URL read from `Info.plist` → `APIBaseURL`, set via `Local.xcconfig` (gitignored).
 - **Auth flow:** `PasswordEntryView` → saves to Keychain → validates via `/periods/stats` → 401 resets back to password screen. All four tab ViewModels watch for 401 and trigger re-auth.
 - **MVVM:** Each tab has an `@Observable` ViewModel (`HomeViewModel`, `CalendarViewModel`, `StatsViewModel`, `LogViewModel`). Views bind to these.
 - **Data refresh:** All views reload from the server on foreground via `willEnterForegroundNotification`.
@@ -57,15 +57,16 @@ SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 - **Tabs (order):** Home (period status + start/end toggle), Calendar (bidirectional infinite-scroll calendar with period highlighting + predicted future periods), Log (avg stats + period history with swipe-to-edit/delete), Stats (5 chart visualizations using Swift Charts + custom SwiftUI)
 - **Calendar predictions:** `CalendarViewModel.computePredictions()` derives avg cycle length and avg period duration from fetched periods, projects up to 24 future cycles. Predicted days stored in a `Set<Date>` for O(1) lookup. Also predicts remaining days of in-progress periods. `DayCell` renders predictions as dashed gold circles. Calendar scrolls to current month on appear via `ScrollViewReader`.
 - **Stats tab:** Year picker with "All" default. Charts: Cycle Length Trend (line+area), Days per Month (bar), Period Duration Variation (scatter+range band), Cycle Regularity Gauge (custom arc, year-only), Start Day Patterns (horizontal bar, all-years-only). Uses `ChartCard` wrapper. `StatsViewModel` computes all chart data as derived properties from `selectedYear`.
-- **Bundle ID:** `com.izaro.moonthread`
+- **Local config:** `PeriodTracker/Local.xcconfig` (gitignored) sets `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`. Copy `Local.xcconfig.example` to get started.
 - **Xcode project:** Hand-written `.pbxproj` — when adding Swift files, they must be registered in both the PBXFileReference and PBXBuildFile sections.
 
 ## Privacy Rules
 - `periods.csv` is gitignored. **Never read, print, or display period data to the console.** This includes dates, durations, or any content from the CSV or API responses.
 - `.env` contains `API_KEY` — gitignored, never commit or print.
+- `Local.xcconfig` contains `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER` — gitignored, never commit or print.
 
 ## Deployment
 - **Backend:** Railway auto-deploys from `backend/` directory. Dockerfile runs `alembic upgrade head` then uvicorn on `$PORT`.
 - **Env vars on Railway:** `DATABASE_URL` (from Postgres addon), `API_KEY` (user-chosen password), `DEMO_API_KEY` (optional, enables read-only demo mode with seeded data)
-- **Remote:** `https://github.com/dividing-by-zaro/ios-moonthread.git`
-- **Production URL:** `https://your-backend-url.example.com`
+- **iOS config:** Copy `PeriodTracker/Local.xcconfig.example` to `PeriodTracker/Local.xcconfig` and set `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`.
+- **Production URL:** Set in `Local.xcconfig` (not tracked in git)
