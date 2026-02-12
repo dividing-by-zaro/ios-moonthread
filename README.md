@@ -121,6 +121,8 @@ PRODUCT_BUNDLE_IDENTIFIER = com.yourname.moonthread
 
 ### Building & Sideloading onto Your Device
 
+> Note: This production URL is for demonstration purposes only and has since been changed. I recommend using a randomly generated URL.
+
 **1. Open the project in Xcode**
 
 Open `PeriodTracker/PeriodTracker.xcodeproj`.
