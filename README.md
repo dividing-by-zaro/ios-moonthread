@@ -1,6 +1,6 @@
 ## Moonthread
 
-A personal period tracking app you can sideload onto your iPhone. MoonThread tracks one thing: your period. No ads, no upsells, you control your data.
+A personal period tracking app you can sideload onto your iPhone. Moonthread tracks one thing: your period. No ads, no upsells, you control your data.
 
 > Note: Screenshots contain AI-generated demo data.
 
@@ -46,7 +46,7 @@ A personal period tracking app you can sideload onto your iPhone. MoonThread tra
 
 ### Setting Up the Backend on Railway
 
-The backend is a FastAPI server that stores your period data in PostgreSQL. MoonThread uses an API key for authentication rather than a username/password, since it's designed for one person.
+The backend is a FastAPI server that stores your period data in PostgreSQL. Moonthread uses an API key for authentication rather than a username/password, since it's designed for one person.
 
 I recommend [Railway](https://railway.app/) for deployment:
 - One subscription keeps all your services in one place
@@ -148,7 +148,7 @@ Open `PeriodTracker/PeriodTracker.xcodeproj`.
 
 The first time you sideload, iOS may block the app from opening. Go to **Settings > General > VPN & Device Management**, find your developer profile, and tap **Trust**.
 
-**5. Open MoonThread and enter your API key**
+**5. Open Moonthread and enter your API key**
 
 The app will prompt you for your API key on first launch. This is the key you created in the Railway setup. It's stored securely in your device's Keychain.
 
