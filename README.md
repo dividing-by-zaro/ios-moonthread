@@ -1,4 +1,4 @@
-## MoonThread
+## Moonthread
 
 A personal period tracking app you can sideload onto your iPhone. MoonThread tracks one thing: your period. No ads, no upsells, you control your data.
 
