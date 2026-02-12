@@ -1,10 +1,8 @@
 ## MoonThread
 
-A personal period tracking app you can sideload onto your iPhone. No ads, no upsells, no one else owns your data.
+A personal period tracking app you can sideload onto your iPhone. MoonThread tracks one thing: your period. No ads, no upsells, you control your data.
 
-MoonThread tracks one thing: your period. It has a refined, understated dark UI designed for adults, and stores your data in your own database.
-
-> The screenshots below contain AI-generated test data for demonstration purposes.
+> Note: Screenshots contain AI-generated demo data.
 
 <p align="center">
   <img src="screenshots/moonthread-1-home.png" width="200" />
