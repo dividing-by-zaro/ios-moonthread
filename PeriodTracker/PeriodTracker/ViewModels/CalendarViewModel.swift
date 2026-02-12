@@ -28,7 +28,7 @@ class CalendarViewModel {
 
     func monthTitle(for date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
+        formatter.dateFormat = calendar.component(.month, from: date) == 1 ? "MMMM yyyy" : "MMMM"
         return formatter.string(from: date)
     }
 
