@@ -55,6 +55,8 @@ I recommend [Railway](https://railway.app/) for deployment:
 
 Here's how to set it up:
 
+> Note: This production URL is for demonstration purposes only and has since been changed. I recommend using a randomly generated URL.
+
 **1. Create a new project in Railway**
 
 - Deploy the backend by connecting this GitHub repo
@@ -120,8 +122,6 @@ PRODUCT_BUNDLE_IDENTIFIER = com.yourname.moonthread
 ---
 
 ### Building & Sideloading onto Your Device
-
-> Note: This production URL is for demonstration purposes only and has since been changed. I recommend using a randomly generated URL.
 
 **1. Open the project in Xcode**
 
