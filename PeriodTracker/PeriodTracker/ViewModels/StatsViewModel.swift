@@ -105,7 +105,13 @@ class StatsViewModel {
     }
 
     var totalPeriodDays: Int {
-        monthlyPeriodDays.map(\.days).reduce(0, +)
+        let cal = Calendar.current
+        var total = 0
+        for period in filteredPeriods {
+            let end = period.endDate ?? Date()
+            total += (cal.dateComponents([.day], from: period.startDate, to: end).day ?? 0) + 1
+        }
+        return total
     }
 
     // MARK: - Period Duration Variation
