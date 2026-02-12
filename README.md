@@ -13,6 +13,8 @@ A period tracking iOS app with cloud backup.
 - [x] Cloud backup via FastAPI + PostgreSQL backend on Railway
 - [x] Password-based API key authentication with iOS Keychain storage
 - [x] CSV import utility with duplicate detection and data validation
+- [x] Animated zen moon & stars home screen with full-screen rotating star field
+- [x] Predicted date shown alongside countdown on home screen (e.g. "Next expected Feb 18 — in 6 days")
 - [x] Smoky green ultra-modern dark theme with pulsing animations
 - [x] Backend security hardening: timing-safe auth, rate limiting, date validation, overlap detection, stats caching, API docs disabled
 - [x] Demo mode via `DEMO_API_KEY` — read-only access to seeded sample data for screenshots

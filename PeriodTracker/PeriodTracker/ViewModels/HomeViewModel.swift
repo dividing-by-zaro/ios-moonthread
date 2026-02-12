@@ -27,13 +27,16 @@ class HomeViewModel {
             return "Period in progress"
         }
         if let predicted = stats.predictedNextStart {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            let dateStr = formatter.string(from: predicted)
             let days = Calendar.current.dateComponents([.day], from: Date(), to: predicted).day ?? 0
             if days > 0 {
-                return "Next expected in \(days) day\(days == 1 ? "" : "s")"
+                return "Next expected \(dateStr) — in \(days) day\(days == 1 ? "" : "s")"
             } else if days == 0 {
-                return "Expected today"
+                return "Expected today, \(dateStr)"
             } else {
-                return "\(-days) day\(-days == 1 ? "" : "s") late"
+                return "\(-days) day\(-days == 1 ? "" : "s") late — expected \(dateStr)"
             }
         }
         return "Not enough data for prediction"

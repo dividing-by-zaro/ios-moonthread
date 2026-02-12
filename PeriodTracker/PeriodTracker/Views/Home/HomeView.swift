@@ -2,11 +2,23 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var vm = HomeViewModel()
+    @State private var starRotation: Double = 0
     @Binding var isAuthenticated: Bool
 
     var body: some View {
         ZStack {
             AppColor.background.ignoresSafeArea()
+
+            if !vm.isActive {
+                StarField(count: 40)
+                    .rotationEffect(.degrees(starRotation))
+                    .ignoresSafeArea()
+                    .onAppear {
+                        withAnimation(.linear(duration: 120).repeatForever(autoreverses: false)) {
+                            starRotation = 360
+                        }
+                    }
+            }
 
             VStack(spacing: 40) {
                 Spacer()
