@@ -21,7 +21,7 @@ def _model(owner: str):
 
 def _validate_date_range(d: datetime.date) -> None:
     today = datetime.date.today()
-    lower = today.replace(year=today.year - MAX_DATE_RANGE_YEARS)
+    lower = today - datetime.timedelta(days=MAX_DATE_RANGE_YEARS * 365)
     upper = today + datetime.timedelta(days=1)  # allow today, reject future
     if d < lower or d > upper:
         raise ValueError(f"Date must be between {lower} and {upper}")

@@ -40,7 +40,7 @@ FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
 - **Data model:** `periods` table — `id`, `start_date` (UNIQUE), `end_date` (NULL = ongoing), `created_at`. `demo_periods` table — same schema, pre-seeded with 27 demo periods.
 - **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)
 - **Config:** `app/config.py` auto-converts Railway's `postgresql://` to `postgresql+asyncpg://`
-- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration 002 adds UNIQUE on `start_date`; migration 003 creates `demo_periods` table and seeds 27 demo periods.
+- **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration failure prevents the app from starting. Migration 002 adds UNIQUE on `start_date`; migration 003 creates `demo_periods` table and seeds 27 demo periods.
 - **Validation:** All date inputs are bounded (10 years past to today). Overlap detection (`_check_overlap`) runs on create/update/end to prevent intersecting periods. DB-level UNIQUE on `start_date` guards against race conditions. `IntegrityError` caught and converted to `ValueError`.
 - **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle. Stats response is cached in-memory for 30s per owner; any mutation invalidates that owner's cache.
 - **Error responses:** Routes return generic error messages (not internal exception text) to avoid information disclosure.
@@ -67,7 +67,7 @@ SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 - `Local.xcconfig` contains `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER` — gitignored, never commit or print.
 
 ## Deployment
-- **Backend:** Railway auto-deploys from `backend/` directory. Dockerfile runs `alembic upgrade head` then uvicorn on `$PORT`.
+- **Backend:** Railway auto-deploys from `backend/` directory. Dockerfile chains `alembic upgrade head && uvicorn` so the app won't start on a broken schema.
 - **Env vars on Railway:** `DATABASE_URL` (from Postgres addon), `API_KEY` (user-chosen password), `DEMO_API_KEY` (optional, enables read-only demo mode with seeded data)
 - **iOS config:** Copy `PeriodTracker/Local.xcconfig.example` to `PeriodTracker/Local.xcconfig` and set `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`.
 - **Production URL:** Set in `Local.xcconfig` (not tracked in git)
