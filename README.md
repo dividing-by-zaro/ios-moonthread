@@ -5,11 +5,11 @@ A personal period tracking app you can sideload onto your iPhone. Moonthread tra
 > Note: Screenshots contain AI-generated demo data.
 
 <p align="center">
-  <img src="screenshots/moonthread-1-home.png" width="200" />
+  <img src="screenshots/moonthread-1-home-framed.png" width="200" />
   &nbsp;&nbsp;
-  <img src="screenshots/moonthread-2-calendar.png" width="200" />
+  <img src="screenshots/moonthread-2-calendar-framed.png" width="200" />
   &nbsp;&nbsp;
-  <img src="screenshots/moonthread-4-stats.png" width="200" />
+  <img src="screenshots/moonthread-4-stats-framed.png" width="200" />
 </p>
 
 ### Features
