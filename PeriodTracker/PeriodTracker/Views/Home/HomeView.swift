@@ -44,7 +44,7 @@ struct HomeView: View {
                     ) {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
-                        Task { await vm.togglePeriod() }
+                        vm.togglePeriod()
                     }
                     .disabled(vm.isActionButtonBlocked)
                     .opacity(vm.isActionButtonBlocked ? 0.4 : 1.0)
@@ -68,6 +68,28 @@ struct HomeView: View {
         }
         .onChange(of: vm.showUnauthorized) { _, val in
             if val { isAuthenticated = false }
+        }
+        .sheet(isPresented: $vm.showStartDatePicker) {
+            DatePickerSheet(
+                label: "START DATE",
+                buttonTitle: "Start Period",
+                dateRange: Calendar.current.date(byAdding: .year, value: -1, to: Date())!...Date(),
+                initialDate: Date(),
+                errorMessage: vm.errorMessage,
+                onConfirm: { date in await vm.startPeriod(date: date) },
+                onCancel: { vm.showStartDatePicker = false }
+            )
+        }
+        .sheet(isPresented: $vm.showEndDatePicker) {
+            DatePickerSheet(
+                label: "END DATE",
+                buttonTitle: "End Period",
+                dateRange: (vm.stats?.currentPeriod?.startDate ?? Date())...Date(),
+                initialDate: Date(),
+                errorMessage: vm.errorMessage,
+                onConfirm: { date in await vm.endPeriod(date: date) },
+                onCancel: { vm.showEndDatePicker = false }
+            )
         }
         .sheet(item: $vm.stalePeriod) { period in
             StalePeriodSheet(

@@ -96,6 +96,13 @@ actor APIClient {
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await URLSession.shared.data(for: req)
+        } catch let error as URLError where error.code == .networkConnectionLost {
+            // Retry once — stale keep-alive connections cause -1005 on non-GET requests
+            do {
+                (data, response) = try await URLSession.shared.data(for: req)
+            } catch {
+                throw APIError.networkError(error)
+            }
         } catch {
             throw APIError.networkError(error)
         }

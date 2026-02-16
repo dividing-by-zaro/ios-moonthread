@@ -8,6 +8,8 @@ class HomeViewModel {
     var errorMessage: String?
     var showUnauthorized = false
     var stalePeriod: Period?
+    var showStartDatePicker = false
+    var showEndDatePicker = false
 
     var isActive: Bool {
         stats?.currentPeriod != nil
@@ -79,14 +81,36 @@ class HomeViewModel {
         checkForStalePeriod()
     }
 
-    func togglePeriod() async {
+    func togglePeriod() {
+        if stats?.currentPeriod != nil {
+            showEndDatePicker = true
+        } else {
+            showStartDatePicker = true
+        }
+    }
+
+    func startPeriod(date: Date) async {
         errorMessage = nil
         do {
-            if let current = stats?.currentPeriod {
-                _ = try await APIClient.shared.endPeriod(id: current.id, date: Date())
-            } else {
-                _ = try await APIClient.shared.startPeriod(date: Date())
+            _ = try await APIClient.shared.startPeriod(date: date)
+            showStartDatePicker = false
+            await load()
+        } catch let error as APIError {
+            if case .unauthorized = error {
+                showUnauthorized = true
             }
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func endPeriod(date: Date) async {
+        guard let current = stats?.currentPeriod else { return }
+        errorMessage = nil
+        do {
+            _ = try await APIClient.shared.endPeriod(id: current.id, date: date)
+            showEndDatePicker = false
             await load()
         } catch let error as APIError {
             if case .unauthorized = error {

@@ -36,6 +36,7 @@
 		AA000027 /* DayOfWeekChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000027 /* DayOfWeekChart.swift */; };
 		AA000028 /* EditPeriodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000028 /* EditPeriodSheet.swift */; };
 		AA000030 /* StalePeriodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000030 /* StalePeriodSheet.swift */; };
+		AA000031 /* DatePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000031 /* DatePickerSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		AB000027 /* DayOfWeekChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayOfWeekChart.swift; sourceTree = "<group>"; };
 		AB000028 /* EditPeriodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPeriodSheet.swift; sourceTree = "<group>"; };
 		AB000030 /* StalePeriodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalePeriodSheet.swift; sourceTree = "<group>"; };
+		AB000031 /* DatePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerSheet.swift; sourceTree = "<group>"; };
 		AC000001 /* PeriodTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeriodTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB000029 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -163,6 +165,7 @@
 				AB000013 /* PeriodStatusCard.swift */,
 				AB000014 /* ActionButton.swift */,
 				AB000030 /* StalePeriodSheet.swift */,
+				AB000031 /* DatePickerSheet.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -305,6 +308,7 @@
 				AA000027 /* DayOfWeekChart.swift in Sources */,
 				AA000028 /* EditPeriodSheet.swift in Sources */,
 				AA000030 /* StalePeriodSheet.swift in Sources */,
+				AA000031 /* DatePickerSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
