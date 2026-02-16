@@ -7,9 +7,25 @@ class HomeViewModel {
     var isLoading = false
     var errorMessage: String?
     var showUnauthorized = false
+    var stalePeriod: Period?
 
     var isActive: Bool {
         stats?.currentPeriod != nil
+    }
+
+    var isActionButtonBlocked: Bool {
+        stalePeriod != nil
+    }
+
+    var suggestedEndDate: Date {
+        guard let period = stalePeriod else { return Date() }
+        let avgDays = stats?.averagePeriodLength.map { Int($0.rounded()) } ?? 5
+        let suggested = Calendar.current.date(byAdding: .day, value: avgDays - 1, to: period.startDate) ?? Date()
+        return min(suggested, Date())
+    }
+
+    var stalePeriodDayCount: Int {
+        stalePeriod?.daysSinceStart ?? 0
     }
 
     var statusText: String {
@@ -60,6 +76,7 @@ class HomeViewModel {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+        checkForStalePeriod()
     }
 
     func togglePeriod() async {
@@ -78,6 +95,31 @@ class HomeViewModel {
             errorMessage = error.errorDescription
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    func endStalePeriod(date: Date) async {
+        guard let period = stalePeriod else { return }
+        errorMessage = nil
+        do {
+            _ = try await APIClient.shared.endPeriod(id: period.id, date: date)
+            stalePeriod = nil
+            await load()
+        } catch let error as APIError {
+            if case .unauthorized = error {
+                showUnauthorized = true
+            }
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func checkForStalePeriod() {
+        if let current = stats?.currentPeriod, current.daysSinceStart >= 20 {
+            stalePeriod = current
+        } else {
+            stalePeriod = nil
         }
     }
 }

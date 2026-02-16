@@ -46,6 +46,8 @@ struct HomeView: View {
                         impact.impactOccurred()
                         Task { await vm.togglePeriod() }
                     }
+                    .disabled(vm.isActionButtonBlocked)
+                    .opacity(vm.isActionButtonBlocked ? 0.4 : 1.0)
                     .padding(.horizontal, 32)
                 }
 
@@ -66,6 +68,18 @@ struct HomeView: View {
         }
         .onChange(of: vm.showUnauthorized) { _, val in
             if val { isAuthenticated = false }
+        }
+        .sheet(item: $vm.stalePeriod) { period in
+            StalePeriodSheet(
+                period: period,
+                daysSinceStart: vm.stalePeriodDayCount,
+                suggestedEndDate: vm.suggestedEndDate,
+                errorMessage: vm.errorMessage,
+                onConfirm: { date in
+                    await vm.endStalePeriod(date: date)
+                }
+            )
+            .interactiveDismissDisabled(true)
         }
     }
 }

@@ -15,6 +15,7 @@ A personal period tracking app you can sideload onto your iPhone. Moonthread tra
 ### Features
 
 - Start/end period tracking with a single tap
+- Stale period prompt — if a period is open for 20+ days, the app prompts you to close it with a suggested end date
 - Zen moon & stars home screen with animated star field
 - Predicted next period date with countdown on home screen
 - Infinite-scroll calendar with logged dates (solid) and predicted dates (dashed gold)
