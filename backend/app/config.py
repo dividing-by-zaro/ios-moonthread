@@ -11,9 +11,11 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env"}
 
+    environment: str | None = None
+
     @model_validator(mode="after")
     def fix_database_url(self):
-        # Railway provides postgresql:// but asyncpg needs postgresql+asyncpg://
+        # Some providers give postgresql:// but asyncpg needs postgresql+asyncpg://
         if self.database_url.startswith("postgresql://"):
             self.database_url = self.database_url.replace(
                 "postgresql://", "postgresql+asyncpg://", 1
@@ -28,7 +30,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def reject_default_api_key_in_production(self):
-        if self.api_key == "dev-key" and os.getenv("RAILWAY_ENVIRONMENT"):
+        is_production = self.environment == "production" or os.getenv(
+            "RAILWAY_ENVIRONMENT"
+        )
+        if self.api_key == "dev-key" and is_production:
             raise ValueError(
                 "API_KEY must be set to a secure value in production "
                 "(still using default 'dev-key')"
