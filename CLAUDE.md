@@ -70,7 +70,7 @@ SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 - `Local.xcconfig` contains `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER` — gitignored, never commit or print.
 
 ## Deployment
-- **Backend:** Coolify (self-hosted) auto-deploys from `backend/` directory. Dockerfile chains `alembic upgrade head && uvicorn` so the app won't start on a broken schema. Dockerfile includes a `HEALTHCHECK` using Python stdlib (no curl/wget needed in slim image).
+- **Backend:** Coolify (self-hosted) auto-deploys from `backend/` directory. Dockerfile chains `alembic upgrade head && uvicorn` so the app won't start on a broken schema. Note: avoid Dockerfile `HEALTHCHECK` — Coolify overrides it with its own `curl`/`wget` check, which fails on `python:3.13-slim`.
 - **Network:** Backend accessed via Tailscale. Server hostname is `pickle-jar` on the tailnet. Coolify publishes a host port that maps to container port 8000.
 - **Env vars:** `DATABASE_URL` (PostgreSQL), `API_KEY` (user-chosen password), `ENVIRONMENT=production` (rejects default dev-key), `DEMO_API_KEY` (optional, enables read-only demo mode with seeded data)
 - **iOS config:** Copy `PeriodTracker/Local.xcconfig.example` to `PeriodTracker/Local.xcconfig` and set `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`. Note: xcconfig treats `//` as a comment — use `http:/$()/hostname:port` to escape it.
