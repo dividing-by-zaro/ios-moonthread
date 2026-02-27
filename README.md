@@ -29,7 +29,7 @@ A personal period tracking app you can sideload onto your iPhone. Moonthread tra
 
 - **iOS:** SwiftUI, iOS 17+, MVVM
 - **Backend:** Python, FastAPI, async SQLAlchemy, PostgreSQL, Alembic
-- **Hosting:** Railway (or any platform that runs Docker)
+- **Hosting:** Coolify (self-hosted) via Tailscale (or any platform that runs Docker)
 - **Package management:** uv
 
 ---
@@ -41,7 +41,7 @@ A personal period tracking app you can sideload onto your iPhone. Moonthread tra
 - A cable to connect the two
 - [Xcode](https://developer.apple.com/xcode/) installed
 - An [Apple Developer account](https://developer.apple.com/) (free works, but app signatures expire after 7 days; $99/year for persistent apps)
-- A [Railway](https://railway.app/) account (or another hosting provider for the backend)
+- A hosting provider for the backend (e.g. [Coolify](https://coolify.io/) self-hosted, [Railway](https://railway.app/), or any Docker host)
 
 ---
 

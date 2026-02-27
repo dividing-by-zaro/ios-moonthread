@@ -32,14 +32,14 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun simctl launch boo
 Two independent codebases in one repo: a Python backend and a SwiftUI iOS app communicating over REST.
 
 ### Backend (`backend/`)
-FastAPI + async SQLAlchemy + PostgreSQL, deployed on Railway.
+FastAPI + async SQLAlchemy + PostgreSQL, deployed on Coolify (self-hosted), accessed via Tailscale.
 
 - **Entry point:** `app/main.py` — mounts period routes; `/health` is unauthenticated. OpenAPI docs (`/docs`, `/redoc`, `/openapi.json`) are disabled in production.
-- **Auth:** `app/auth.py` — `verify_api_key` dependency checks `X-API-Key` header via `hmac.compare_digest` (timing-safe) against `API_KEY` and optionally `DEMO_API_KEY`. Returns `"user"` or `"demo"` owner string. Rate-limited to 10 req/min per IP via `slowapi`. Config rejects default `dev-key` when `RAILWAY_ENVIRONMENT` is set. Config validates `DEMO_API_KEY` differs from `API_KEY`.
+- **Auth:** `app/auth.py` — `verify_api_key` dependency checks `X-API-Key` header via `hmac.compare_digest` (timing-safe) against `API_KEY` and optionally `DEMO_API_KEY`. Returns `"user"` or `"demo"` owner string. Rate-limited to 10 req/min per IP via `slowapi`. Config rejects default `dev-key` when `ENVIRONMENT=production` or `RAILWAY_ENVIRONMENT` is set. Config validates `DEMO_API_KEY` differs from `API_KEY`.
 - **Demo mode:** Separate `demo_periods` table (identical schema to `periods`) with seeded sample data. `_model(owner)` helper in `period_service.py` returns `DemoPeriod` or `Period` based on owner. Demo owner is read-only (mutations return 403). Stats cache is owner-keyed.
 - **Data model:** `periods` table — `id`, `start_date` (UNIQUE), `end_date` (NULL = ongoing), `created_at`. `demo_periods` table — same schema, pre-seeded with 27 demo periods.
 - **Layering:** Routes (`app/routes/`) → Services (`app/services/`) → ORM (`app/models.py`)
-- **Config:** `app/config.py` auto-converts Railway's `postgresql://` to `postgresql+asyncpg://`
+- **Config:** `app/config.py` auto-converts `postgresql://` to `postgresql+asyncpg://`
 - **Migrations:** Alembic with async engine; runs automatically on container startup via Dockerfile. Migration failure prevents the app from starting. Migration 002 adds UNIQUE on `start_date`; migration 003 creates `demo_periods` table and seeds 27 demo periods.
 - **Validation:** All date inputs are bounded (10 years past to today). Overlap detection (`_check_overlap`) runs on create/update/end to prevent intersecting periods. DB-level UNIQUE on `start_date` guards against race conditions. `IntegrityError` caught and converted to `ValueError`.
 - **Stats logic** (`services/period_service.py`): cycle length = gap between consecutive start dates; period length = end - start + 1; prediction = last start + avg cycle. Stats response is cached in-memory for 30s per owner; any mutation invalidates that owner's cache.
@@ -70,7 +70,9 @@ SwiftUI iOS 17+, MVVM pattern. Display name is "MoonThread".
 - `Local.xcconfig` contains `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER` — gitignored, never commit or print.
 
 ## Deployment
-- **Backend:** Railway auto-deploys from `backend/` directory. Dockerfile chains `alembic upgrade head && uvicorn` so the app won't start on a broken schema.
-- **Env vars on Railway:** `DATABASE_URL` (from Postgres addon), `API_KEY` (user-chosen password), `DEMO_API_KEY` (optional, enables read-only demo mode with seeded data)
-- **iOS config:** Copy `PeriodTracker/Local.xcconfig.example` to `PeriodTracker/Local.xcconfig` and set `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`.
-- **Production URL:** Set in `Local.xcconfig` (not tracked in git)
+- **Backend:** Coolify (self-hosted) auto-deploys from `backend/` directory. Dockerfile chains `alembic upgrade head && uvicorn` so the app won't start on a broken schema. Dockerfile includes a `HEALTHCHECK` using Python stdlib (no curl/wget needed in slim image).
+- **Network:** Backend accessed via Tailscale. Server hostname is `pickle-jar` on the tailnet. Coolify publishes a host port that maps to container port 8000.
+- **Env vars:** `DATABASE_URL` (PostgreSQL), `API_KEY` (user-chosen password), `ENVIRONMENT=production` (rejects default dev-key), `DEMO_API_KEY` (optional, enables read-only demo mode with seeded data)
+- **iOS config:** Copy `PeriodTracker/Local.xcconfig.example` to `PeriodTracker/Local.xcconfig` and set `DEVELOPMENT_TEAM`, `API_BASE_URL`, and `PRODUCT_BUNDLE_IDENTIFIER`. Note: xcconfig treats `//` as a comment — use `http:/$()/hostname:port` to escape it.
+- **Production URL:** Set in `Local.xcconfig` (not tracked in git). ATS exception for the Tailscale hostname is in `Info.plist` to allow plain HTTP.
+- **iCloud Private Relay:** Must be disabled (or the Wi-Fi network excluded) on the iPhone, as Private Relay cannot resolve Tailscale MagicDNS hostnames.
