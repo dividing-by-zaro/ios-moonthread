@@ -9,6 +9,7 @@ from app.models import DemoPeriod, Period
 from app.schemas import PeriodStats
 
 MAX_DATE_RANGE_YEARS = 10
+MAX_PREDICTION_CYCLE_GAP_DAYS = 90
 
 # Owner-keyed stats cache: { owner: {"value": ..., "expires_at": ...} }
 _stats_cache: dict[str, dict[str, object]] = {}
@@ -56,6 +57,21 @@ async def _check_overlap(
 
 def _invalidate_stats_cache(owner: str) -> None:
     _stats_cache.pop(owner, None)
+
+
+def _weighted_average(values: list[int]) -> float | None:
+    if not values:
+        return None
+
+    weights = range(1, len(values) + 1)
+    weighted_total = sum(value * weight for value, weight in zip(values, weights))
+    return round(weighted_total / sum(weights), 1)
+
+
+def _rounded_prediction_days(value: float | None) -> int | None:
+    if value is None:
+        return None
+    return max(1, int(value + 0.5))
 
 
 async def list_periods(db: AsyncSession, owner: str) -> list:
@@ -184,28 +200,36 @@ async def get_stats(db: AsyncSession, owner: str) -> PeriodStats:
     avg_period_length = None
     if completed:
         lengths = [(p.end_date - p.start_date).days + 1 for p in completed]
-        avg_period_length = round(sum(lengths) / len(lengths), 1)
+        avg_period_length = _weighted_average(lengths)
+    predicted_period_length_days = _rounded_prediction_days(avg_period_length)
+    if predicted_period_length_days is None and periods:
+        predicted_period_length_days = 5
 
-    # Average cycle length (gap between consecutive period starts)
+    # Average cycle length (gap between consecutive period starts),
+    # excluding large outlier gaps and weighting recent cycles more heavily.
     avg_cycle_length = None
     if len(periods) >= 2:
         cycles = []
         for i in range(len(periods) - 1):
             gap = (periods[i + 1].start_date - periods[i].start_date).days
-            cycles.append(gap)
-        avg_cycle_length = round(sum(cycles) / len(cycles), 1)
+            if 0 < gap < MAX_PREDICTION_CYCLE_GAP_DAYS:
+                cycles.append(gap)
+        avg_cycle_length = _weighted_average(cycles)
+    predicted_cycle_length_days = _rounded_prediction_days(avg_cycle_length)
 
     # Predicted next start
     predicted = None
-    if avg_cycle_length and periods:
+    if predicted_cycle_length_days is not None and periods:
         last_start = periods[-1].start_date
-        predicted = last_start + datetime.timedelta(days=round(avg_cycle_length))
+        predicted = last_start + datetime.timedelta(days=predicted_cycle_length_days)
 
     stats = PeriodStats(
         average_cycle_length=avg_cycle_length,
         average_period_length=avg_period_length,
         current_period=current,
         predicted_next_start=predicted,
+        predicted_cycle_length_days=predicted_cycle_length_days,
+        predicted_period_length_days=predicted_period_length_days,
     )
 
     _stats_cache[owner] = {"value": stats, "expires_at": now + _STATS_TTL_SECONDS}

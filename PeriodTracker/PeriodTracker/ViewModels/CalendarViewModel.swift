@@ -4,6 +4,7 @@ import SwiftUI
 @Observable
 class CalendarViewModel {
     var periods: [Period] = []
+    var stats: PeriodStats?
     var months: [Date] = []
     var isLoading = false
     var errorMessage: String?
@@ -78,46 +79,41 @@ class CalendarViewModel {
     }
 
     private func computePredictions() {
-        let sorted = periods.sorted { $0.startDate < $1.startDate }
-        guard sorted.count >= 2 else { predictedPeriodDays = []; return }
+        guard let stats else { predictedPeriodDays = []; return }
 
-        var cycleLengths: [Int] = []
-        for i in 1..<sorted.count {
-            if let days = calendar.dateComponents([.day], from: sorted[i-1].startDate, to: sorted[i].startDate).day,
-               days > 0, days < 90 {
-                cycleLengths.append(days)
-            }
-        }
-        guard !cycleLengths.isEmpty else { predictedPeriodDays = []; return }
-        let avgCycle = Double(cycleLengths.reduce(0, +)) / Double(cycleLengths.count)
-
-        let durations = sorted.compactMap { $0.durationDays }
-        let avgDuration = durations.isEmpty ? 5.0 : Double(durations.reduce(0, +)) / Double(durations.count)
-
-        guard let lastStart = sorted.last?.startDate else { predictedPeriodDays = []; return }
-        let roundedCycle = Int(round(avgCycle))
-        let roundedDuration = Int(round(avgDuration))
+        let predictedDuration = max(1, stats.predictedPeriodLengthDays ?? 5)
+        let predictedCycle = stats.predictedCycleLengthDays
         let today = calendar.startOfDay(for: Date())
 
         var days = Set<Date>()
 
-        // Predict remaining days of an in-progress period
-        if let current = sorted.last, current.isActive {
+        // Predict remaining days of an in-progress period using the shared stats duration.
+        if let current = stats.currentPeriod, current.isActive {
             let start = calendar.startOfDay(for: current.startDate)
             let elapsedDays = calendar.dateComponents([.day], from: start, to: today).day ?? 0
-            for d in (elapsedDays + 1)..<max(elapsedDays + 1, roundedDuration) {
+            for d in (elapsedDays + 1)..<max(elapsedDays + 1, predictedDuration) {
                 if let day = calendar.date(byAdding: .day, value: d, to: start) {
                     days.insert(day)
                 }
             }
         }
 
-        for i in 1...24 {
-            if let predictedStart = calendar.date(byAdding: .day, value: roundedCycle * i, to: lastStart) {
-                let start = calendar.startOfDay(for: predictedStart)
-                guard start >= today else { continue }
-                for d in 0..<roundedDuration {
-                    if let day = calendar.date(byAdding: .day, value: d, to: start) {
+        if let predictedNextStart = stats.predictedNextStart {
+            let firstPredictedStart = calendar.startOfDay(for: predictedNextStart)
+
+            if let predictedCycle {
+                for i in 0..<24 {
+                    if let start = calendar.date(byAdding: .day, value: predictedCycle * i, to: firstPredictedStart) {
+                        for d in 0..<predictedDuration {
+                            if let day = calendar.date(byAdding: .day, value: d, to: start) {
+                                days.insert(day)
+                            }
+                        }
+                    }
+                }
+            } else {
+                for d in 0..<predictedDuration {
+                    if let day = calendar.date(byAdding: .day, value: d, to: firstPredictedStart) {
                         days.insert(day)
                     }
                 }
@@ -130,7 +126,10 @@ class CalendarViewModel {
         isLoading = true
         errorMessage = nil
         do {
-            periods = try await APIClient.shared.fetchPeriods()
+            async let fetchedPeriods = APIClient.shared.fetchPeriods()
+            async let fetchedStats = APIClient.shared.fetchStats()
+            periods = try await fetchedPeriods
+            stats = try await fetchedStats
             computePredictions()
         } catch let error as APIError {
             if case .unauthorized = error { showUnauthorized = true }

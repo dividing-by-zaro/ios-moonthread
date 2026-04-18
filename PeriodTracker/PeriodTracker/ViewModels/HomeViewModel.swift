@@ -21,7 +21,7 @@ class HomeViewModel {
 
     var suggestedEndDate: Date {
         guard let period = stalePeriod else { return Date() }
-        let avgDays = stats?.averagePeriodLength.map { Int($0.rounded()) } ?? 5
+        let avgDays = stats?.predictedPeriodLengthDays ?? 5
         let suggested = Calendar.current.date(byAdding: .day, value: avgDays - 1, to: period.startDate) ?? Date()
         return min(suggested, Date())
     }

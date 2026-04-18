@@ -30,11 +30,15 @@ struct PeriodStats: Codable {
     let averagePeriodLength: Double?
     let currentPeriod: Period?
     let predictedNextStart: Date?
+    let predictedCycleLengthDays: Int?
+    let predictedPeriodLengthDays: Int?
 
     enum CodingKeys: String, CodingKey {
         case averageCycleLength = "average_cycle_length"
         case averagePeriodLength = "average_period_length"
         case currentPeriod = "current_period"
         case predictedNextStart = "predicted_next_start"
+        case predictedCycleLengthDays = "predicted_cycle_length_days"
+        case predictedPeriodLengthDays = "predicted_period_length_days"
     }
 }

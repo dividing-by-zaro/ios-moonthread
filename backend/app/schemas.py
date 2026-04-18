@@ -30,3 +30,5 @@ class PeriodStats(BaseModel):
     average_period_length: float | None
     current_period: PeriodResponse | None
     predicted_next_start: date | None
+    predicted_cycle_length_days: int | None
+    predicted_period_length_days: int | None
