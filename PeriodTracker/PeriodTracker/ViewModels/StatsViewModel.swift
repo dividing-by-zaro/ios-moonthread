@@ -9,6 +9,9 @@ class StatsViewModel {
     var showUnauthorized = false
     var selectedYear: Int? = nil  // nil = all years
 
+    private let maxPredictionCycleGapDays = 50
+    private let movingAverageWindowPeriods = 6
+
     // MARK: - Derived Data
 
     var availableYears: [Int] {
@@ -28,9 +31,15 @@ class StatsViewModel {
     // MARK: - Cycle Lengths
 
     struct CycleLengthPoint: Identifiable {
-        let id = UUID()
         let date: Date
         let length: Int
+        var id: Date { date }
+    }
+
+    struct CycleMovingAveragePoint: Identifiable {
+        let date: Date
+        let average: Double
+        var id: Date { date }
     }
 
     var cycleLengths: [CycleLengthPoint] {
@@ -46,8 +55,33 @@ class StatsViewModel {
         return result
     }
 
-    var averageCycleLength: Double? {
+    var filteredCycleLengths: [CycleLengthPoint] {
+        cycleLengths.filter { $0.length < maxPredictionCycleGapDays }
+    }
+
+    var cycleLengthMovingAverage: [CycleMovingAveragePoint] {
         let lengths = cycleLengths
+        guard !lengths.isEmpty else { return [] }
+        let cycleWindow = max(1, movingAverageWindowPeriods - 1)
+        var validHistory: [CycleLengthPoint] = []
+        var result: [CycleMovingAveragePoint] = []
+
+        for point in lengths {
+            if point.length < maxPredictionCycleGapDays {
+                validHistory.append(point)
+            }
+
+            let window = validHistory.suffix(cycleWindow)
+            guard !window.isEmpty else { continue }
+            let average = Double(window.map(\.length).reduce(0, +)) / Double(window.count)
+            result.append(CycleMovingAveragePoint(date: point.date, average: average))
+        }
+
+        return result
+    }
+
+    var averageCycleLength: Double? {
+        let lengths = filteredCycleLengths
         guard !lengths.isEmpty else { return nil }
         return Double(lengths.map(\.length).reduce(0, +)) / Double(lengths.count)
     }
@@ -147,7 +181,7 @@ class StatsViewModel {
     // MARK: - Regularity Score
 
     var regularityScore: Double? {
-        let lengths = cycleLengths.map { Double($0.length) }
+        let lengths = filteredCycleLengths.map { Double($0.length) }
         guard lengths.count >= 2 else { return nil }
         let mean = lengths.reduce(0, +) / Double(lengths.count)
         guard mean > 0 else { return nil }

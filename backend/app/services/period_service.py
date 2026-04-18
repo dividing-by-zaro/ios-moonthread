@@ -9,7 +9,7 @@ from app.models import DemoPeriod, Period
 from app.schemas import PeriodStats
 
 MAX_DATE_RANGE_YEARS = 10
-MAX_PREDICTION_CYCLE_GAP_DAYS = 90
+MAX_PREDICTION_CYCLE_GAP_DAYS = 50
 
 # Owner-keyed stats cache: { owner: {"value": ..., "expires_at": ...} }
 _stats_cache: dict[str, dict[str, object]] = {}
